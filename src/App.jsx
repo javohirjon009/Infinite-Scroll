@@ -15,8 +15,18 @@ function App() {
         `https://dummyjson.com/products?limit=10&skip=${skip}`
       );
       const newProducts = res.data.products;
-      setProducts((prev) => [...prev, ...newProducts]);
-      if (newProducts.length < 10) setHasMore(false);
+
+      // ❗ Dublikatlarni filtrlaymiz
+      setProducts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const filteredNew = newProducts.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...filteredNew];
+      });
+
+      // ❗ Mahsulotlar tugaganini tekshiramiz
+      if (res.data.total <= skip + newProducts.length) {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error("Xatolik:", error);
     } finally {
